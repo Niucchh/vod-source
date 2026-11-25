@@ -1,0 +1,107 @@
+name: speed-tag
+
+on:
+  schedule:
+    # 每周一 07:30（北京时间）给源名重新打网速标签
+    - cron: "30 23 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: speed-tag
+  cancel-in-progress: true
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 测速并打标签
+        run: |
+          cat > /tmp/speed_tag.py <<'PY'
+          #!/usr/bin/env python3
+          """每周给点播源名字打网速标签：快 / 中 / 慢。
+
+          规则：对每个源请求 3 次 ?ac=list，取最快的一次作为该源的响应时间；
+          ≤600ms 记「快」，≤900ms 记「中」，更慢或失败记「慢」。
+          名字统一成「源名·快」。成人专线沿用母源，不打标签。
+          """
+          import json
+          import re
+          import time
+          import urllib.request
+
+          TIMEOUT = 8
+          UA = {"User-Agent": "Mozilla/5.0"}
+
+
+          def measure(url):
+              best = None
+              for _ in range(3):
+                  try:
+                      t0 = time.time()
+                      urllib.request.urlopen(urllib.request.Request(url.rstrip("/") + "/?ac=list",
+                                                                     headers=UA), timeout=TIMEOUT).read(1024)
+                      ms = int((time.time() - t0) * 1000)
+                      best = ms if best is None else min(best, ms)
+                  except Exception:
+                      continue
+              return best
+
+
+          def labels(rows):
+              """按相对速度分三档：快的三分之一记「快」，中间三分之一「中」，其余（含探测失败）「慢」。
+              GitHub 机房出口和家用网络的速度水平不同，用相对分档比固定毫秒阈值更稳定。"""
+              ok = sorted([r[1] for r in rows if r[1] is not None])
+              n = len(ok)
+              fast = ok[max(0, n // 3 - 1)] if n else 0
+              mid = ok[max(0, 2 * n // 3 - 1)] if n else 0
+              out = {}
+              for name, ms in rows:
+                  out[name] = "慢" if ms is None else ("快" if ms <= fast else ("中" if ms <= mid else "慢"))
+              return out
+
+
+          def main():
+              cfg = json.load(open("config.json", encoding="utf-8"))
+              rows, items = [], []
+              for s in cfg.get("sources", []):
+                  if "专线" in (s.get("name") or ""):
+                      continue
+                  base = re.split(r"[·・]", s.get("name", ""))[0]
+                  ms = measure(s.get("url", ""))
+                  rows.append((base, ms))
+                  items.append((s, base))
+              lab = labels(rows)
+              changed = 0
+              for s, base in items:
+                  new = f"{base}·{lab[base]}"
+                  print(f"  {base}: {dict(rows)[base] if dict(rows)[base] is not None else '失败'}ms -> {new}")
+                  if new != s["name"]:
+                      s["name"] = new
+                      changed += 1
+              json.dump(cfg, open("config.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+              print(f"[done] {changed} 个源名有变化")
+
+
+          if __name__ == "__main__":
+              main()
+          PY
+          python3 /tmp/speed_tag.py
+
+      - name: 有变化才提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.json
+          if git diff --cached --quiet; then
+            echo "测速结果没有变化，跳过提交"
+          else
+            git commit -m "chore: 每周测速打标签 $(TZ=Asia/Shanghai date +%F)"
+            git pull --rebase --autostash origin main || true
+            git push
+          fi

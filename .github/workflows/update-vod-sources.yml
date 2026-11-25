@@ -263,8 +263,17 @@ jobs:
               for s in sources:
                   url = norm(s.get("url", ""))
                   print(f"  - 复检 {s.get('name', url)}")
-                  if not BLOCK_TYPES:
+                  is_line = "专线" in (s.get("name") or "")
+                  if not BLOCK_TYPES and not is_line:
                       s.pop("blockTypeName", None)
+                  if is_line:
+                      # 成人专线：分类写成固定的「只留成人」，不让每日更新覆盖回全量分类
+                      ok, total = probe(url)
+                      s["_ok"] = ok
+                      if ok:
+                          verified += 1
+                      s["_total"] = None
+                      continue
                   classes = fetch_classes(url)
                   if classes:
                       tc = build_type_config(classes)
