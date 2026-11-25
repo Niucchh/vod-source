@@ -286,7 +286,10 @@ jobs:
                   prev_total = int(re.sub(r"[^0-9]", "", s.get("desc", "")) or 0) or None
                   if total:
                       # 片库量每天会小幅浮动，取整百避免天天产生无意义提交
-                      s["desc"] = f"片库约{int(round(total / 100.0) * 100)}"
+                      suffix = ""
+                      if "｜" in s.get("desc", ""):
+                          suffix = "｜" + s["desc"].split("｜", 1)[1]
+                      s["desc"] = f"片库约{int(round(total / 100.0) * 100)}{suffix}"
                       s["_total"] = int(round(total / 100.0) * 100)
                   else:
                       # 本机被拦或接口抽风时，沿用上次记录的数量，保证排序稳定、不误删
@@ -324,7 +327,16 @@ jobs:
                   added += 1
 
               # 3) 按片库量降序，未知排最后；清掉内部字段
-              sources.sort(key=lambda s: (s.get("_total") or 0), reverse=True)
+              def tier_rank(s):
+                  n = s.get("name", "")
+                  if n.endswith("·快"):
+                      return 0
+                  if n.endswith("·中"):
+                      return 1
+                  if n.endswith("·慢"):
+                      return 2
+                  return 3
+              sources.sort(key=lambda s: (tier_rank(s), -(s.get("_total") or 0)))
               for s in sources:
                   s.pop("_ok", None)
                   s.pop("_total", None)

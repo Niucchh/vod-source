@@ -84,6 +84,12 @@ jobs:
                   if new != s["name"]:
                       s["name"] = new
                       changed += 1
+              def _tier(s):
+                  n = s.get("name", "")
+                  if "专线" in n:
+                      return 3
+                  return {"快": 0, "中": 1, "慢": 2}.get(n.rsplit("·", 1)[-1], 3)
+              cfg["sources"] = sorted(cfg.get("sources", []), key=_tier)
               json.dump(cfg, open("config.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
               print(f"[done] {changed} 个源名有变化")
 
