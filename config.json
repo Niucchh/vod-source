@@ -1,19 +1,25 @@
 {
   "privateKey": "kongke2026",
+  "webTvUrl": "https://files.mac-cms.com/config/channels.json",
   "tvSources": [
     {
-      "name": "聚影综合直播（IPv4 1274台）",
-      "m3uUrl": "https://cdn.jsdelivr.net/gh/suxuang/myIPTV@main/ipv4.m3u",
+      "name": "IPTV 综合 395台",
+      "m3uUrl": "https://cdn.jsdelivr.net/gh/Cx4x/xdd@master/output/ipv4/result.m3u",
       "block": false
     },
     {
-      "name": "vbsky 精选直播（约300台）",
+      "name": "广播电台 374台",
+      "m3uUrl": "https://cdn.jsdelivr.net/gh/fanmingming/live@main/radio/m3u/index.m3u",
+      "block": false
+    },
+    {
+      "name": "IPTV 精选 339台",
       "m3uUrl": "https://cdn.jsdelivr.net/gh/vbskycn/iptv@master/tv/iptv4.m3u",
       "block": false
     },
     {
-      "name": "IPv6 高清直播（需 IPv6）",
-      "m3uUrl": "https://cdn.jsdelivr.net/gh/fanmingming/live@main/tv/m3u/ipv6.m3u",
+      "name": "IPTV 大合集 1274台",
+      "m3uUrl": "https://cdn.jsdelivr.net/gh/suxuang/myIPTV@main/ipv4.m3u",
       "block": false
     }
   ],
