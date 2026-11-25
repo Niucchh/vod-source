@@ -127,6 +127,10 @@
 
   <ul id="list"></ul>
 
+  <h2 style="margin:30px 0 12px;font-size:16px;font-weight:700">电视直播源</h2>
+  <p style="margin:0 0 12px;color:#8b8b93;font-size:13px">M3U 直播列表，在空壳「电视直播」页右上角导入即可；IPv6 那条需要网络支持 IPv6。</p>
+  <ul id="tvlist"></ul>
+
   <footer>
     <h2>怎么用</h2>
     <ol>
@@ -200,6 +204,23 @@ function render(){
   list.querySelectorAll('.copy').forEach(b=>{
     b.onclick = ()=> copy(b.dataset.url,'接口地址');
   });
+
+  const tvl = document.getElementById('tvlist');
+  if(tvl){
+    tvl.innerHTML = '';
+    tvs.forEach(t=>{
+      const li=document.createElement('li');
+      li.innerHTML = `
+        <div>
+          <div class="nm"><span class="dot"></span>${escapeHtml(t.name)}</div>
+          <div class="url">${escapeHtml(t.m3uUrl)}</div>
+          <div class="tags"><span class="tag">M3U 直播</span>${t.block?'<span class="tag">需隐私码</span>':''}</div>
+        </div>
+        <button class="copy" data-url="${escapeHtml(t.m3uUrl)}">复制</button>`;
+      tvl.appendChild(li);
+    });
+    tvl.querySelectorAll('.copy').forEach(b=>{ b.onclick = ()=> copy(b.dataset.url,'直播源地址'); });
+  }
 
   const q = document.getElementById('q');
   q.oninput = ()=>{
