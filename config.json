@@ -237,7 +237,7 @@
         "snm3u8": "索尼资源"
       },
       "blockAdsRule": [],
-      "desc": "片库约149700",
+      "desc": "片库约149800",
       "typeConfig": {
         "电影": [
           "电影",
@@ -736,7 +736,7 @@
       "name": "素博资源·快",
       "url": "https://subocaiji.com/api.php/provide/vod/",
       "blockAdsRule": [],
-      "desc": "片库约119100",
+      "desc": "片库约119200",
       "typeConfig": {
         "电影": [
           "动作片",
@@ -1003,7 +1003,7 @@
         "jsm3u8": "极速资源"
       },
       "blockAdsRule": [],
-      "desc": "片库约117500",
+      "desc": "片库约117600",
       "typeConfig": {
         "电影": [
           "伦理片",
