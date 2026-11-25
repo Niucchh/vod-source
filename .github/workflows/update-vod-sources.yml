@@ -1,1 +1,230 @@
 name: update-vod-sources
+
+on:
+  schedule:
+    # 每天 07:20（北京时间）自动跑一次；站点数量变化不频繁，够用且省 Actions 额度
+    - cron: "20 23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-vod-sources
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 生成配置
+        run: |
+          cat > /tmp/build_config.py <<'PY'
+          #!/usr/bin/env python3
+          """空壳影视（MacCMS App）自定义源配置自动生成脚本。
+
+          作用：
+          1. 读取仓库根目录已有的 config.json 作为基础清单（保留人工命名、隐私码、屏蔽分类）；
+          2. 从持续维护的公开源清单拉取候选源，逐个实测，只把「本次实测可用且 URL 未重复」的源追加进去；
+          3. 已有点播源按实测结果刷新片库数量描述，不会自动删除（避免机器 IP 被拦时误删可用源）；
+          4. 按片库量降序重写 config.json，供 GitHub Pages 直接对外提供。
+          """
+
+          import base64
+          import json
+          import os
+          import re
+          import sys
+          import urllib.parse
+          import urllib.request
+
+          CONFIG_PATH = "config.json"
+          UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+          # 屏蔽分类清单；留空表示不做任何分类屏蔽
+          BLOCK_TYPES = []
+
+          FEEDS = [
+              # 每日 Actions 实测的苹果 CMS 源清单
+              ("andywe", "https://raw.githubusercontent.com/andywe0921-ops/applecms-sources/main/applecms_sources.json"),
+              # 路由器机器人验活的纯 URL 清单（base64）
+              ("yh", "https://raw.githubusercontent.com/YH-Music/vod-sources/main/vod.b64"),
+          ]
+
+
+          def http_get(url, timeout=20):
+              req = urllib.request.Request(url, headers=UA)
+              return urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "ignore")
+
+
+          def norm(url):
+              return url.strip().rstrip("/")
+
+
+          def host_of(url):
+              """同一站点常出现 /provide/vod 与 /api.php/provide/vod 两种写法，按域名去重。"""
+              try:
+                  return (urllib.parse.urlparse(url).hostname or "").lower()
+              except Exception:
+                  return url
+
+
+          def probe(url):
+              """返回 (是否可用, 条目数)。判定标准：HTTP 200 且返回 JSON 内含非空 list。"""
+              try:
+                  data = json.loads(http_get(url))
+              except Exception as exc:  # 超时、非 JSON、被拦都算不可用
+                  print(f"    x 不可用: {type(exc).__name__}")
+                  return False, None
+              lst = data.get("list")
+              total = data.get("total") or data.get("total_approx")
+              if isinstance(total, (int, float)) and total > 0:
+                  return True, int(total)
+              if isinstance(lst, list) and lst:
+                  return True, None
+              return False, None
+
+
+          def load_base():
+              if os.path.exists(CONFIG_PATH):
+                  with open(CONFIG_PATH, encoding="utf-8") as f:
+                      return json.load(f)
+              return {"privateKey": "kongke2026", "tvSources": [], "sources": []}
+
+
+          def collect_candidates():
+              """从维护中的清单抓候选源，返回 [{name,url,from}]。"""
+              out = []
+              for tag, feed in FEEDS:
+                  try:
+                      raw = http_get(feed)
+                  except Exception as exc:
+                      print(f"[skip] {tag} 清单抓取失败: {exc}")
+                      continue
+                  if tag == "andywe":
+                      try:
+                          items = json.loads(raw).get("sources", [])
+                      except Exception:
+                          print("[skip] andywe 清单解析失败")
+                          continue
+                      for it in items:
+                          if it.get("status") not in (None, "ok"):
+                              continue
+                          if not it.get("url"):
+                              continue
+                          out.append({
+                              "name": it.get("name") or "未命名资源",
+                              "url": norm(it["url"]),
+                              "from": it.get("from") or "",
+                              "total": it.get("total_approx") or None,
+                          })
+                      print(f"[feed] andywe 候选 {len(out)} 条")
+                  else:
+                      text = base64.b64decode(raw.strip()).decode("utf-8", "ignore")
+                      cnt = 0
+                      for line in text.splitlines():
+                          line = line.strip()
+                          if not line or line.startswith("#"):
+                              continue
+                          m = re.match(r"^(https?://[^\s#]+)", line)
+                          if not m:
+                              continue
+                          out.append({"name": "", "url": norm(m.group(1)), "from": "", "total": None})
+                          cnt += 1
+                      print(f"[feed] yh 候选 {cnt} 条")
+              return out
+
+
+          def main():
+              base = load_base()
+              sources = base.get("sources", [])
+              known = {host_of(s.get("url", "")) for s in sources}
+              print(f"[base] 已有 {len(sources)} 个点播源")
+
+              # 1) 刷已有点播源的信息
+              verified = 0
+              for s in sources:
+                  url = norm(s.get("url", ""))
+                  print(f"  - 复检 {s.get('name', url)}")
+                  if not BLOCK_TYPES:
+                      s.pop("blockTypeName", None)
+                  ok, total = probe(url)
+                  s["_ok"] = ok
+                  if ok:
+                      verified += 1
+                  prev_total = int(re.sub(r"[^0-9]", "", s.get("desc", "")) or 0) or None
+                  if total:
+                      # 片库量每天会小幅浮动，取整百避免天天产生无意义提交
+                      s["desc"] = f"片库约{int(round(total / 100.0) * 100)}"
+                      s["_total"] = int(round(total / 100.0) * 100)
+                  else:
+                      # 本机被拦或接口抽风时，沿用上次记录的数量，保证排序稳定、不误删
+                      s["_total"] = prev_total
+
+              # 2) 追加新源（必须本次实测可用，且 URL 未重复）
+              added = 0
+              for c in collect_candidates():
+                  h = host_of(c["url"])
+                  if h in known:
+                      continue
+                  print(f"  + 新增候选 {c['url']}")
+                  ok, total = probe(c["url"])
+                  if not ok:
+                      continue
+                  entry = {
+                      "name": c["name"] or h,
+                      "url": c["url"],
+                      "blockAdsRule": [],
+                      "desc": f"片库约{total}" if total else "",
+                      "_ok": True,
+                      "_total": total,
+                  }
+                  if BLOCK_TYPES:
+                      entry["blockTypeName"] = list(BLOCK_TYPES)
+                  if c["from"]:
+                      entry["playerName"] = {c["from"]: entry["name"]}
+                  sources.append(entry)
+                  known.add(h)
+                  added += 1
+
+              # 3) 按片库量降序，未知排最后；清掉内部字段
+              sources.sort(key=lambda s: (s.get("_total") or 0), reverse=True)
+              for s in sources:
+                  s.pop("_ok", None)
+                  s.pop("_total", None)
+                  if not s.get("desc"):
+                      s.pop("desc", None)
+
+              cfg = {
+                  "privateKey": base.get("privateKey", "kongke2026"),
+                  "tvSources": base.get("tvSources", []),
+                  "sources": sources,
+              }
+              with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                  json.dump(cfg, f, ensure_ascii=False, indent=2)
+                  f.write("\n")
+
+              print(f"[done] 写入 {CONFIG_PATH}：共 {len(sources)} 个源；本次复检可用 {verified} 个，新增 {added} 个")
+              return 0
+
+
+          if __name__ == "__main__":
+              sys.exit(main())
+          PY
+          python3 /tmp/build_config.py
+          python3 -c "import json;d=json.load(open('config.json'));print('校验通过:',len(d['sources']),'个源')"
+
+      - name: 有变化才提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.json
+          if git diff --cached --quiet; then
+            echo "config.json 无变化，跳过提交"
+          else
+            git commit -m "chore: 自动更新影视源 $(TZ=Asia/Shanghai date +%F)"
+            git push
+          fi
