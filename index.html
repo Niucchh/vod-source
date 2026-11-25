@@ -94,14 +94,14 @@
         <small>隐私码 PRIVACY KEY</small>
         <b id="key">----</b>
       </div>
-      <i>访问本页即可看到<br>App 内输入后解锁屏蔽分类</i>
+      <i>访问本页即可看到<br>App 内输入即可导入全部源</i>
     </div>
   </header>
 
   <div class="stats">
     <div class="stat"><b id="n-src">0</b><small>点播源</small></div>
     <div class="stat"><b id="n-tv">0</b><small>直播源</small></div>
-    <div class="stat"><b id="n-block">0</b><small>屏蔽分类</small></div>
+    <div class="stat"><b id="n-block">0</b><small>已细分分类</small></div>
   </div>
 
   <div class="bar">
@@ -115,7 +115,7 @@
     <h2>怎么用</h2>
     <ol>
       <li>打开「空壳影视」→ 设置 → 配置地址，粘贴下方这个 json 地址。</li>
-      <li>提示隐私码时，输入页面顶部显示的 code 即可解锁全部分类。</li>
+      <li>提示隐私码时，输入页面顶部显示的 code 即可导入全部源。</li>
       <li>广告多的源可在配置里加 <code>blockAdsRule</code> 正则；失效源换域名即可。</li>
     </ol>
     <div class="addr">
@@ -156,7 +156,7 @@ function render(){
   document.getElementById('key').textContent = cfg.privateKey || '无';
   document.getElementById('n-src').textContent = sources.length;
   document.getElementById('n-tv').textContent = tvs.length;
-  document.getElementById('n-block').textContent = new Set(sources.flatMap(s=>s.blockTypeName||[])).size;
+  document.getElementById('n-block').textContent = sources.filter(s=>s.typeConfig).length;
 
   const addr = location.href.replace(/[^/]*$/,'') + 'config.json';
   document.getElementById('addr').textContent = addr;
@@ -175,7 +175,7 @@ function render(){
         <div class="tags">
           ${s.desc?`<span class="tag">${escapeHtml(s.desc)}</span>`:''}
           ${pn?`<span class="tag">线路 ${escapeHtml(pn)}</span>`:''}
-          ${(s.blockTypeName&&s.blockTypeName.length)?`<span class="tag">屏蔽 ${s.blockTypeName.length} 类</span>`:''}
+          ${s.typeConfig?`<span class="tag">二级分类 ${Object.keys(s.typeConfig).length} 组</span>`:''}
         </div>
       </div>
       <button class="copy" data-url="${escapeHtml(s.url)}">复制</button>`;
