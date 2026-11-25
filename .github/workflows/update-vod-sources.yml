@@ -2,7 +2,7 @@ name: update-vod-sources
 
 on:
   schedule:
-    # 每天 07:20（北京时间）自动跑一次；站点数量变化不频繁，够用且省 Actions 额度
+    # 每天 07:20（北京时间）自动跑一次；源站有变动才提交，避免无意义 commit
     - cron: "20 23 * * *"
   workflow_dispatch:
 
