@@ -79,6 +79,27 @@ jobs:
           PARENT_RENAME = {"体育赛事": "体育", "AI制作": "AI 制作", "电视剧集": "电视剧"}
 
 
+          def norm_parent(name):
+              """站点的一级名五花八门（电影片 / 连续剧 / 动漫片 / 短剧大全 …），统一成本项目的标准组名。"""
+              if not name:
+                  return None
+              if name in PARENT_RENAME:
+                  return PARENT_RENAME[name]
+              for g, kws in (("纪录片", ("纪录", "纪实")),
+                             ("解说与预告", ("解说", "预告", "花絮")),
+                             ("短剧", ("短剧", "微剧", "竖屏")),
+                             ("体育", ("体育", "赛事", "足球", "篮球", "电竞")),
+                             ("综艺", ("综艺", "演唱会", "晚会")),
+                             ("动漫", ("动漫", "动画", "漫画")),
+                             ("电视剧", ("电视剧", "连续剧", "剧集", "剧场", "剧")),
+                             ("电影", ("电影", "影片", "大片"))):
+                  if any(k in name for k in kws):
+                      return g
+              if any(k in name for k in ("资讯", "新闻", "其他", "推荐", "榜单")):
+                  return "其他"
+              return name
+
+
           def special_group(name):
               low = (name or "").lower()
               for g, kws in SPECIAL_GROUPS:
@@ -134,7 +155,7 @@ jobs:
                       if has_tree and pid == 0 and child_count.get(c.get("type_id")):
                           continue  # 有下级的一级分类只作容器，不再重复列自己
                       parent = id2name.get(pid) if has_tree and pid else None
-                      g = PARENT_RENAME.get(parent, parent) if parent else flat_group(name)
+                      g = norm_parent(parent) if parent else flat_group(name)
                   groups.setdefault(g, []).append(name)
               ordered = {g: groups[g] for g in GROUP_ORDER if groups.get(g)}
               for g, v in groups.items():
