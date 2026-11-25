@@ -8,15 +8,6 @@
       "playerName": {
         "jlm3u8": "巨量资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约355200"
     },
@@ -26,15 +17,6 @@
       "playerName": {
         "bfzym3u8": "暴风资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约173700"
     },
@@ -44,15 +26,6 @@
       "playerName": {
         "lzm3u8": "量子资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约165400"
     },
@@ -62,15 +35,6 @@
       "playerName": {
         "snm3u8": "索尼资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约149700"
     },
@@ -80,15 +44,6 @@
       "playerName": {
         "zuidam3u8": "酷播"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约126300"
     },
@@ -98,15 +53,6 @@
       "playerName": {
         "sdm3u8": "闪电资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约126100"
     },
@@ -116,15 +62,6 @@
       "playerName": {
         "wjm3u8": "无尽资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约125800"
     },
@@ -134,15 +71,6 @@
       "playerName": {
         "gsm3u8": "光速资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约119200"
     },
@@ -152,30 +80,12 @@
       "playerName": {
         "jinyingm3u8": "金鹰资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约119200"
     },
     {
       "name": "素博资源",
       "url": "https://subocaiji.com/api.php/provide/vod/",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约119100"
     },
@@ -185,15 +95,6 @@
       "playerName": {
         "hnm3u8": "红牛资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约118600"
     },
@@ -203,30 +104,12 @@
       "playerName": {
         "hhm3u8": "豪华资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约118300"
     },
     {
       "name": "虎牙资源",
       "url": "https://www.huyaapi.com/api.php/provide/vod/",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约118100"
     },
@@ -236,45 +119,18 @@
       "playerName": {
         "jsm3u8": "极速资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约117500"
     },
     {
       "name": "优质资源",
       "url": "https://api.yzzy-api.com/inc/apijson.php",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约110300"
     },
     {
       "name": "1080资源",
       "url": "https://api.1080zyku.com/inc/apijson.php",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约110300"
     },
@@ -284,15 +140,6 @@
       "playerName": {
         "ffm3u8": "非凡资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约99300"
     },
@@ -302,30 +149,12 @@
       "playerName": {
         "modum3u8": "魔都资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约92300"
     },
     {
       "name": "如意资源",
       "url": "https://cj.rycjapi.com/api.php/provide/vod/",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约90700"
     },
@@ -335,15 +164,6 @@
       "playerName": {
         "dyttm3u8": "电影天堂资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约85300"
     },
@@ -353,45 +173,18 @@
       "playerName": {
         "tym3u8": "天涯资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约77700"
     },
     {
       "name": "爱坤",
       "url": "https://ikunzyapi.com/api.php/provide/vod/",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约67800"
     },
     {
       "name": "U酷资源",
       "url": "https://api.ukuapi.com/api.php/provide/vod/",
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约61200"
     },
@@ -401,15 +194,6 @@
       "playerName": {
         "dbm3u8": "百度资源"
       },
-      "blockTypeName": [
-        "伦理片",
-        "理论片",
-        "福利",
-        "韩国伦理",
-        "港台三级",
-        "两性课堂",
-        "写真热舞"
-      ],
       "blockAdsRule": [],
       "desc": "片库约49800"
     }
