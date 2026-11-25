@@ -348,6 +348,8 @@ jobs:
                   "tvSources": base.get("tvSources", []),
                   "sources": sources,
               }
+              if base.get("webTvUrl"):
+                  cfg["webTvUrl"] = base["webTvUrl"]
               with open(CONFIG_PATH, "w", encoding="utf-8") as f:
                   json.dump(cfg, f, ensure_ascii=False, indent=2)
                   f.write("\n")
