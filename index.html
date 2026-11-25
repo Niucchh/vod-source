@@ -80,6 +80,13 @@
     li{grid-template-columns:1fr}
     .copy{justify-self:flex-start}
   }
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}
+  .links a{
+    font-size:13px;color:#9fd0ff;text-decoration:none;background:#131c27;border:1px solid #26405a;
+    border-radius:8px;padding:7px 12px;transition:.2s;
+  }
+  .links a:hover{border-color:var(--accent);color:var(--accent);background:#16222f}
+  .links a.primary{background:rgba(63,182,255,.14);border-color:rgba(63,182,255,.45);color:#cdeaff}
 </style>
 </head>
 <body>
@@ -89,7 +96,8 @@
       <h1>影视源配置 · <span>空壳可用</span></h1>
       <div class="meta" id="meta">加载中…</div>
     </div>
-    <div class="keybox" id="keybox" title="点击复制隐私码">
+    <!-- 隐私码与相关入口：暂时隐藏，如需恢复把下面这行的 style 去掉即可 -->
+    <div class="keybox" id="keybox" title="点击复制隐私码" style="display:none">
       <div>
         <small>隐私码 PRIVACY KEY</small>
         <b id="key">----</b>
@@ -97,6 +105,14 @@
       <i>访问本页即可看到<br>App 内输入即可导入全部源</i>
     </div>
   </header>
+
+  <div class="links">
+    <a class="primary" href="https://mac-cms.com/app/app-faq" target="_blank" rel="noopener">空壳技术支持 / 常见问题</a>
+    <a href="https://mac-cms.com" target="_blank" rel="noopener">空壳官网</a>
+    <a href="https://mac-cms.com/app/app-settings" target="_blank" rel="noopener">换源与隐私模式</a>
+    <a href="https://mac-cms.com/app/app-update-log" target="_blank" rel="noopener">版本更新日志</a>
+    <a href="https://t.me/mac_cms" target="_blank" rel="noopener">官方 TG 交流群</a>
+  </div>
 
   <div class="stats">
     <div class="stat"><b id="n-src">0</b><small>点播源</small></div>
@@ -115,7 +131,7 @@
     <h2>怎么用</h2>
     <ol>
       <li>打开「空壳影视」→ 设置 → 配置地址，粘贴下方这个 json 地址。</li>
-      <li>提示隐私码时，输入页面顶部显示的 code 即可导入全部源。</li>
+      <li>提示隐私码时输入配置里的 code 即可导入全部源（本页不再公开显示）。</li>
       <li>广告多的源可在配置里加 <code>blockAdsRule</code> 正则；失效源换域名即可。</li>
     </ol>
     <div class="addr">
