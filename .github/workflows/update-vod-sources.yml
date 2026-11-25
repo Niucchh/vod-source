@@ -60,6 +60,99 @@ jobs:
               return urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "ignore")
 
 
+          # ---------- 分类体系（typeConfig） ----------
+          # 片单式专题：这几类分类名本身就是"榜单/片单"性质，单独提成一级
+          SPECIAL_GROUPS = [
+              ("4K 片单", ("4k",)),
+              ("Netflix 片单", ("netflix", "奈飞")),
+              ("邵氏经典", ("邵氏",)),
+              ("豆瓣高分片单", ("豆瓣",)),
+              ("IMDb 片单", ("imdb",)),
+              ("纪录片", ("纪录", "记录")),
+              ("解说与预告", ("解说", "预告")),
+          ]
+          GROUP_ORDER = [
+              "电影", "电视剧", "动漫", "综艺", "短剧", "纪录片", "4K 片单",
+              "Netflix 片单", "邵氏经典", "豆瓣高分片单", "IMDb 片单",
+              "解说与预告", "体育", "AI 制作", "其他",
+          ]
+          PARENT_RENAME = {"体育赛事": "体育", "AI制作": "AI 制作", "电视剧集": "电视剧"}
+
+
+          def special_group(name):
+              low = (name or "").lower()
+              for g, kws in SPECIAL_GROUPS:
+                  if any(k in low for k in kws):
+                      return g
+              return None
+
+
+          SHORT_KWS = ("短剧", "爽剧", "短剧", "穿越", "总裁", "民国", "年代", "脑洞", "都市",
+                       "女频", "仙侠", "古装", "重生", "豪门", "逆袭", "科普")
+          SPORT_KWS = ("体育", "足球", "篮球", "台球", "网球", "斯诺克", "赛事")
+
+
+          def flat_group(name):
+              """分类信息里没有父级 (type_pid) 的站点，按分类名归大类。"""
+              g = special_group(name)
+              if g:
+                  return g
+              if any(k in name for k in ("综艺", "演唱会")):
+                  return "综艺"
+              if any(k in name for k in SHORT_KWS):
+                  return "短剧"
+              if any(k in name for k in ("动漫", "漫剧")):
+                  return "动漫"
+              if any(k in name for k in SPORT_KWS):
+                  return "体育"
+              if name.endswith("片") or "电影" in name:
+                  return "电影"
+              if name.endswith("剧") or "剧集" in name or "连续剧" in name or name == "电视剧":
+                  return "电视剧"
+              return "电影"
+
+
+          def build_type_config(classes):
+              """把接口返回的 class 列表整理成 空壳 的 typeConfig：一级分类 -> 二级分类名。"""
+              names = [c.get("type_name") for c in classes if c.get("type_name")]
+              if not names:
+                  return None
+              id2name = {c.get("type_id"): c.get("type_name") for c in classes}
+              has_tree = any(c.get("type_pid") for c in classes)
+              child_count = {}
+              for c in classes:
+                  if c.get("type_pid"):
+                      child_count[c["type_pid"]] = child_count.get(c["type_pid"], 0) + 1
+              groups = {}
+              for c in classes:
+                  name = c.get("type_name")
+                  if not name:
+                      continue
+                  g = special_group(name)
+                  if not g:
+                      pid = c.get("type_pid") or 0
+                      if has_tree and pid == 0 and child_count.get(c.get("type_id")):
+                          continue  # 有下级的一级分类只作容器，不再重复列自己
+                      parent = id2name.get(pid) if has_tree and pid else None
+                      g = PARENT_RENAME.get(parent, parent) if parent else flat_group(name)
+                  groups.setdefault(g, []).append(name)
+              ordered = {g: groups[g] for g in GROUP_ORDER if groups.get(g)}
+              for g, v in groups.items():
+                  if g not in ordered:
+                      ordered[g] = v
+              return ordered
+
+
+          def fetch_classes(url, timeout=15):
+              sep = "&" if "?" in url else "?"
+              try:
+                  data = json.loads(http_get(url + sep + "ac=list", timeout=timeout))
+              except Exception as exc:
+                  print(f"    x 分类清单取不到: {type(exc).__name__}")
+                  return None
+              return data.get("class") or None
+
+
           def norm(url):
               return url.strip().rstrip("/")
 
@@ -151,6 +244,11 @@ jobs:
                   print(f"  - 复检 {s.get('name', url)}")
                   if not BLOCK_TYPES:
                       s.pop("blockTypeName", None)
+                  classes = fetch_classes(url)
+                  if classes:
+                      tc = build_type_config(classes)
+                      if tc:
+                          s["typeConfig"] = tc
                   ok, total = probe(url)
                   s["_ok"] = ok
                   if ok:
@@ -184,6 +282,11 @@ jobs:
                   }
                   if BLOCK_TYPES:
                       entry["blockTypeName"] = list(BLOCK_TYPES)
+                  classes = fetch_classes(c["url"])
+                  if classes:
+                      tc = build_type_config(classes)
+                      if tc:
+                          entry["typeConfig"] = tc
                   if c["from"]:
                       entry["playerName"] = {c["from"]: entry["name"]}
                   sources.append(entry)
@@ -215,7 +318,7 @@ jobs:
               sys.exit(main())
           PY
           python3 /tmp/build_config.py
-          python3 -c "import json;d=json.load(open('config.json'));print('校验通过:',len(d['sources']),'个源')"
+          python3 -c "import json;d=json.load(open('config.json'));print('校验通过:',len(d['sources']),'个源, 带分类配置', sum(1 for s in d['sources'] if s.get('typeConfig')))"
 
       - name: 有变化才提交
         run: |
